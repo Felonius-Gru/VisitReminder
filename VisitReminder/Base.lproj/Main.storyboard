@@ -116,13 +116,13 @@
                                         <rect key="frame" x="0.0" y="0.0" width="343" height="30"/>
                                         <nil key="textColor"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits"/>
+                                        <textInputTraits key="textInputTraits" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                     </textField>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter State" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="9xk-tM-Ymo">
                                         <rect key="frame" x="0.0" y="62" width="343" height="30"/>
                                         <nil key="textColor"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits"/>
+                                        <textInputTraits key="textInputTraits" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                     </textField>
                                     <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="JSo-qw-Ej7">
                                         <rect key="frame" x="0.0" y="124" width="343" height="216"/>
@@ -134,7 +134,7 @@
                                         <rect key="frame" x="0.0" y="372" width="343" height="30"/>
                                         <nil key="textColor"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits"/>
+                                        <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
                                     </textField>
                                 </subviews>
                             </stackView>
@@ -147,11 +147,28 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="New Reminder" id="0hZ-VO-0hE">
-                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="eXv-Co-wXW"/>
-                        <barButtonItem key="rightBarButtonItem" title="Save" id="6rj-9r-w9u"/>
+                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="eXv-Co-wXW">
+                            <connections>
+                                <action selector="cancel:" destination="BYZ-38-t0r" id="frb-9A-bPu"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Save" id="6rj-9r-w9u">
+                            <connections>
+                                <segue destination="E8V-OK-dtU" kind="unwind" unwindAction="unwindToReminderListWithSender:" id="7zf-oZ-Y9S"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="cancelBarButton" destination="eXv-Co-wXW" id="hTG-bQ-i1H"/>
+                        <outlet property="cityTextField" destination="JbY-xd-1NC" id="JQ2-0s-j8g"/>
+                        <outlet property="lastvisitdayDatePicker" destination="JSo-qw-Ej7" id="L7Q-Ve-eY2"/>
+                        <outlet property="remindafterTextField" destination="g3M-2S-aSH" id="kTs-Nm-zCy"/>
+                        <outlet property="saveBarButton" destination="6rj-9r-w9u" id="R9X-JX-7zy"/>
+                        <outlet property="stateTextField" destination="9xk-tM-Ymo" id="j2a-7m-JBT"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <exit id="E8V-OK-dtU" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1364" y="131.78410794602701"/>
         </scene>

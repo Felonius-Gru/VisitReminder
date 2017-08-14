@@ -34,6 +34,18 @@ class ReminderTableViewController: UITableViewController {
         
         reminders += [reminder1, reminder2, reminder3]
     }
+    
+    // MARK: Actions
+    
+    @IBAction func unwindToReminderList(sender: UIStoryboardSegue) {
+        if let sourceViewController = sender.source as? ReminderViewController, let reminder = sourceViewController.reminder {
+            // Add a new reminder
+            let newIndexPath = IndexPath(row: reminders.count, section: 0)
+            
+            reminders.append(reminder)
+            tableView.insertRows(at: [newIndexPath], with: .automatic)
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
