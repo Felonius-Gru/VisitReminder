@@ -61,6 +61,7 @@
                                     <outlet property="lastVisitDate" destination="DKL-oq-geq" id="ULH-L0-8iN"/>
                                     <outlet property="remainDayLabel" destination="xk6-bZ-PoR" id="dv1-d1-8gu"/>
                                     <outlet property="stateLabel" destination="4Vd-4t-VNx" id="oGV-Un-ORR"/>
+                                    <segue destination="BYZ-38-t0r" kind="show" identifier="editReminderSegue" id="kQC-JW-ziV"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -188,7 +189,10 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Q9f-hh-J5B" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="463" y="132"/>
+            <point key="canvasLocation" x="466" y="523"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="kQC-JW-ziV"/>
+    </inferredMetricsTieBreakers>
 </document>

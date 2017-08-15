@@ -23,9 +23,44 @@ class ReminderViewController: UIViewController, UITextFieldDelegate {
     
     var reminder: Reminder?
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        
+        cityTextField.delegate = self
+        stateTextField.delegate = self
+        remindafterTextField.delegate = self
+        
+        if let reminder = reminder {
+            navigationItem.title = reminder.city
+            cityTextField.text = reminder.city
+            stateTextField.text = reminder.state
+            remindafterTextField.text = String(reminder.remindafter)
+            lastvisitdayDatePicker.date = reminder.lastvisitdate
+        }
+        
+        updateSaveButtonState()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
     // MARK: Navigation
     @IBAction func cancel(_ sender: Any) {
-        dismiss(animated: true, completion: nil)
+        
+        let isPresentingInAddReminderMode = presentingViewController is UINavigationController
+        
+        if isPresentingInAddReminderMode {
+            dismiss(animated: true, completion: nil)
+        }
+        else if let owningNavigationController = navigationController {
+            owningNavigationController.popViewController(animated: true)
+        }
+        else {
+            fatalError("The ReminderViewController is not inside a navigation controller.")
+        }
     }
     
     // This method lets you configure a view controller before it's presented.
@@ -57,6 +92,10 @@ class ReminderViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         updateSaveButtonState()
+        
+        if textField == cityTextField {
+            navigationItem.title = textField.text
+        }
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -73,23 +112,5 @@ class ReminderViewController: UIViewController, UITextFieldDelegate {
         let remindafter = remindafterTextField.text ?? ""
         saveBarButton.isEnabled = !city.isEmpty && !state.isEmpty && !remindafter.isEmpty
     }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-
-        cityTextField.delegate = self
-        stateTextField.delegate = self
-        remindafterTextField.delegate = self
-        
-        updateSaveButtonState()
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-
 }
 

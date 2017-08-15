@@ -7,48 +7,18 @@
 //
 
 import UIKit
+import os.log
 
 class ReminderTableViewController: UITableViewController {
     
     // MARK: Properties
     
     var reminders = [Reminder]()
-    
-    // MARK: Private Methods
-    
-    private func loadSampleReminders() {
-        
-        let now = Date()
-        
-        guard let reminder1 = Reminder(city: "New York", state: "New York", lastvisitdate: now, remindafter: 1) else {
-            fatalError("Unable to instantiate reminder1")
-        }
-        
-        guard let reminder2 = Reminder(city: "Washington", state: "Washington", lastvisitdate: now, remindafter: 2) else {
-            fatalError("Unable to instantiate reminder1")
-        }
-        
-        guard let reminder3 = Reminder(city: "Boston", state: "Massachusetts", lastvisitdate: now, remindafter: 3) else {
-            fatalError("Unable to instantiate reminder1")
-        }
-        
-        reminders += [reminder1, reminder2, reminder3]
-    }
-    
-    // MARK: Actions
-    
-    @IBAction func unwindToReminderList(sender: UIStoryboardSegue) {
-        if let sourceViewController = sender.source as? ReminderViewController, let reminder = sourceViewController.reminder {
-            // Add a new reminder
-            let newIndexPath = IndexPath(row: reminders.count, section: 0)
-            
-            reminders.append(reminder)
-            tableView.insertRows(at: [newIndexPath], with: .automatic)
-        }
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        navigationItem.leftBarButtonItem = editButtonItem
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -99,25 +69,22 @@ class ReminderTableViewController: UITableViewController {
         return cell
     }
 
-    /*
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
         return true
     }
-    */
 
-    /*
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
+            reminders.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+        }
     }
-    */
 
     /*
     // Override to support rearranging the table view.
@@ -134,14 +101,72 @@ class ReminderTableViewController: UITableViewController {
     }
     */
 
-    /*
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
+        super.prepare(for: segue, sender: sender)
+        
+        switch segue.identifier ?? "" {
+        case "addReminderSegue":
+            os_log("Adding a new reminder.", log: OSLog.default, type: .debug)
+        case "editReminderSegue":
+            guard let reminderDetailViewController = segue.destination as? ReminderViewController else {
+                fatalError("Unexpected destination: \(segue.destination)")
+            }
+            guard let selectedReminderCell = sender as? ReminderTableViewCell else {
+                fatalError("Unexpected sender: \(String(describing: sender))")
+            }
+            guard let indexPath = tableView.indexPath(for: selectedReminderCell) else {
+                fatalError("The selected cell is not being displayed by the table")
+            }
+            
+            let selectedReminder = reminders[indexPath.row]
+            reminderDetailViewController.reminder = selectedReminder
+        default:
+            fatalError("Unexpected Segue Identifier; \(String(describing: segue.identifier))")
+        }
     }
-    */
 
+    // MARK: Private Methods
+    
+    private func loadSampleReminders() {
+        
+        let now = Date()
+        
+        guard let reminder1 = Reminder(city: "New York", state: "New York", lastvisitdate: now, remindafter: 1) else {
+            fatalError("Unable to instantiate reminder1")
+        }
+        
+        guard let reminder2 = Reminder(city: "Washington", state: "Washington", lastvisitdate: now, remindafter: 2) else {
+            fatalError("Unable to instantiate reminder1")
+        }
+        
+        guard let reminder3 = Reminder(city: "Boston", state: "Massachusetts", lastvisitdate: now, remindafter: 3) else {
+            fatalError("Unable to instantiate reminder1")
+        }
+        
+        reminders += [reminder1, reminder2, reminder3]
+    }
+    
+    // MARK: Actions
+    
+    @IBAction func unwindToReminderList(sender: UIStoryboardSegue) {
+        if let sourceViewController = sender.source as? ReminderViewController, let reminder = sourceViewController.reminder {
+            
+            if let selectedIndexPath = tableView.indexPathForSelectedRow {
+                //Update an existing reminder
+                reminders[selectedIndexPath.row] = reminder
+                tableView.reloadRows(at: [selectedIndexPath], with: .none)
+            } else {
+                // Add a new reminder
+                let newIndexPath = IndexPath(row: reminders.count, section: 0)
+                
+                reminders.append(reminder)
+                tableView.insertRows(at: [newIndexPath], with: .automatic)
+            }
+        }
+    }
 }
