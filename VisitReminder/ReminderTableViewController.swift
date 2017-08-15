@@ -26,8 +26,12 @@ class ReminderTableViewController: UITableViewController {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
         
-        // Load the sample data
-        loadSampleReminders()
+        if let savedReminders = loadReminders() {
+            reminders += savedReminders
+        } else {
+            // Load the sample data
+            loadSampleReminders()
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -80,6 +84,7 @@ class ReminderTableViewController: UITableViewController {
         if editingStyle == .delete {
             // Delete the row from the data source
             reminders.remove(at: indexPath.row)
+            saveReminders()
             tableView.deleteRows(at: [indexPath], with: .fade)
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
@@ -151,6 +156,20 @@ class ReminderTableViewController: UITableViewController {
         reminders += [reminder1, reminder2, reminder3]
     }
     
+    private func saveReminders() {
+        let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(reminders, toFile: Reminder.ArchiveURL.path)
+        
+        if isSuccessfulSave {
+            os_log("Reminders successfully saved.", log: OSLog.default, type: .debug)
+        } else {
+            os_log("Failed to save reminders", log: OSLog.default, type: .error)
+        }
+    }
+    
+    private func loadReminders() -> [Reminder]? {
+        return NSKeyedUnarchiver.unarchiveObject(withFile: Reminder.ArchiveURL.path) as? [Reminder]
+    }
+    
     // MARK: Actions
     
     @IBAction func unwindToReminderList(sender: UIStoryboardSegue) {
@@ -167,6 +186,8 @@ class ReminderTableViewController: UITableViewController {
                 reminders.append(reminder)
                 tableView.insertRows(at: [newIndexPath], with: .automatic)
             }
+            
+            saveReminders()
         }
     }
 }
