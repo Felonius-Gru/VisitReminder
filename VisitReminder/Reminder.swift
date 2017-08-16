@@ -18,6 +18,10 @@ class Reminder: NSObject, NSCoding {
     var lastvisitdate: Date
     var remindafter: Int
     
+    var isOverdue: Bool {
+        return (Date().compare(self.lastvisitdate.addingTimeInterval(TimeInterval(remindafter * 60))) == ComparisonResult.orderedDescending)
+    }
+    
     // MARK: Archiving Paths
     
     static let DocumentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -54,7 +58,7 @@ class Reminder: NSObject, NSCoding {
         self.lastvisitdate = lastvisitdate
         self.remindafter = remindafter
     }
-    
+
     // MARK: NSCoding
     
     func encode(with aCoder: NSCoder) {

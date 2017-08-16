@@ -8,6 +8,7 @@
 
 import UIKit
 import os.log
+import DLLocalNotifications
 
 class ReminderTableViewController: UITableViewController {
     
@@ -28,10 +29,9 @@ class ReminderTableViewController: UITableViewController {
         
         if let savedReminders = loadReminders() {
             reminders += savedReminders
-        } else {
-            // Load the sample data
-            loadSampleReminders()
         }
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ReminderTableViewController.refresh), name: NSNotification.Name(rawValue: "ListShouldRefresh") , object: nil)
     }
 
     override func didReceiveMemoryWarning() {
@@ -66,9 +66,15 @@ class ReminderTableViewController: UITableViewController {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd.MM.yyyy"
         let date = formatter.string(from: reminder.lastvisitdate)
-
         cell.lastVisitDate.text = date
-        cell.remainDayLabel.text = String(describing: reminder.remindafter)
+
+        if reminder.isOverdue {
+            cell.remainDayLabel.text = "Overdue"
+            cell.remainDayLabel.textColor = UIColor.red
+        } else {
+            cell.remainDayLabel.text = String(describing: reminder.remindafter)
+            cell.remainDayLabel.textColor = UIColor.black
+        }
 
         return cell
     }
@@ -84,6 +90,14 @@ class ReminderTableViewController: UITableViewController {
         if editingStyle == .delete {
             // Delete the row from the data source
             reminders.remove(at: indexPath.row)
+
+            
+//            let notification = DLNotification(identifier: "Notification\(indexPath.row)", alertTitle: "", alertBody: "", date: Date(), repeats: .None)
+//            let scheduler = DLNotificationScheduler()
+//            scheduler.cancelNotification(notification: notification)
+            
+            scheduleNotification(identifier: "Notification\(indexPath.row)", title: "", body: "", lastvisitdate: Date(), remindafter: -1)
+            
             saveReminders()
             tableView.deleteRows(at: [indexPath], with: .fade)
         } else if editingStyle == .insert {
@@ -134,6 +148,12 @@ class ReminderTableViewController: UITableViewController {
             fatalError("Unexpected Segue Identifier; \(String(describing: segue.identifier))")
         }
     }
+    
+    // MARK: Methods
+    
+    func refresh() {
+        tableView.reloadData()
+    }
 
     // MARK: Private Methods
     
@@ -170,6 +190,16 @@ class ReminderTableViewController: UITableViewController {
         return NSKeyedUnarchiver.unarchiveObject(withFile: Reminder.ArchiveURL.path) as? [Reminder]
     }
     
+    private func scheduleNotification (identifier: String, title: String, body: String, lastvisitdate: Date, remindafter: Int) {
+        // The date you would like the notification to fire at
+        let triggerDate = lastvisitdate.addingTimeInterval(TimeInterval(remindafter * 60))
+
+        let notification = DLNotification(identifier: identifier, alertTitle: title, alertBody: body, date: triggerDate, repeats: .None)
+        
+        let scheduler = DLNotificationScheduler()
+        print(scheduler.scheduleNotification(notification: notification) ?? "")
+    }
+    
     // MARK: Actions
     
     @IBAction func unwindToReminderList(sender: UIStoryboardSegue) {
@@ -178,12 +208,15 @@ class ReminderTableViewController: UITableViewController {
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
                 //Update an existing reminder
                 reminders[selectedIndexPath.row] = reminder
+                scheduleNotification(identifier: "Notification\(selectedIndexPath.row)", title: "Visit \(reminder.city) in \(reminder.state)", body: "You should visit \(reminder.city) in \(reminder.state)", lastvisitdate: reminder.lastvisitdate, remindafter: reminder.remindafter)
+
                 tableView.reloadRows(at: [selectedIndexPath], with: .none)
             } else {
                 // Add a new reminder
                 let newIndexPath = IndexPath(row: reminders.count, section: 0)
                 
                 reminders.append(reminder)
+                scheduleNotification(identifier: "Notification\(newIndexPath.row)", title: "Visit \(reminder.city) in \(reminder.state)", body: "You should visit \(reminder.city) in \(reminder.state)", lastvisitdate: reminder.lastvisitdate, remindafter: reminder.remindafter)
                 tableView.insertRows(at: [newIndexPath], with: .automatic)
             }
             
