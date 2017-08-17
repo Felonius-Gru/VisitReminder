@@ -17,9 +17,14 @@ class Reminder: NSObject, NSCoding {
     var state: String
     var lastvisitdate: Date
     var remindafter: Int
+    var notificationId: String
     
     var isOverdue: Bool {
         return (Date().compare(self.lastvisitdate.addingTimeInterval(TimeInterval(remindafter * 60))) == ComparisonResult.orderedDescending)
+    }
+    
+    var todeadline: Int {
+        return Int(self.lastvisitdate.addingTimeInterval(TimeInterval(self.remindafter * 60)).timeIntervalSinceNow / 60)
     }
     
     // MARK: Archiving Paths
@@ -30,6 +35,7 @@ class Reminder: NSObject, NSCoding {
     // MARK: Types
     
     struct PropertyKey {
+        static let notificationId = "notificationId"
         static let city = "city"
         static let state = "state"
         static let lastvisitdate = "lastvisitdate"
@@ -39,7 +45,9 @@ class Reminder: NSObject, NSCoding {
     
     // MARK: Initialization
     
-    init?(city: String, state: String, lastvisitdate: Date, remindafter: Int) {
+    init?(notificationId: String, city: String, state: String, lastvisitdate: Date, remindafter: Int) {
+        
+        self.notificationId = notificationId
         
         guard !city.isEmpty else {
             return nil
@@ -66,6 +74,7 @@ class Reminder: NSObject, NSCoding {
         aCoder.encode(state, forKey: PropertyKey.state)
         aCoder.encode(lastvisitdate, forKey: PropertyKey.lastvisitdate)
         aCoder.encode(remindafter, forKey: PropertyKey.remindafter)
+        aCoder.encode(notificationId, forKey: PropertyKey.notificationId)
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
@@ -76,7 +85,8 @@ class Reminder: NSObject, NSCoding {
         let state = aDecoder.decodeObject(forKey: PropertyKey.state) as? String
         let lastvisitdate = aDecoder.decodeObject(forKey: PropertyKey.lastvisitdate) as? Date
         let remindafter = aDecoder.decodeInteger(forKey: PropertyKey.remindafter)
+        let notificationId = aDecoder.decodeObject(forKey: PropertyKey.notificationId) as? String
         
-        self.init(city: city, state: state!, lastvisitdate: lastvisitdate!, remindafter: remindafter)
+        self.init(notificationId: notificationId!, city: city, state: state!, lastvisitdate: lastvisitdate!, remindafter: remindafter)
     }
 }

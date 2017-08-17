@@ -79,8 +79,8 @@ class ReminderViewController: UIViewController, UITextFieldDelegate {
         let date = lastvisitdayDatePicker.date
         let remindafter:Int? = Int(remindafterTextField.text!)
         
-        // Set the meal to be passed to MealTableViewController after the unwind segue.
-        reminder = Reminder(city: city, state: state, lastvisitdate: date, remindafter: remindafter!)
+        // Set the reminder to be passed to ReminderTableViewController after the unwind segue.
+        reminder = Reminder(notificationId: reminder?.notificationId ?? "", city: city, state: state, lastvisitdate: date, remindafter: remindafter!)
     }
     
     // MARK: UITextFieldDelegate

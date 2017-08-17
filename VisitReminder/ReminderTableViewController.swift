@@ -72,7 +72,7 @@ class ReminderTableViewController: UITableViewController {
             cell.remainDayLabel.text = "Overdue"
             cell.remainDayLabel.textColor = UIColor.red
         } else {
-            cell.remainDayLabel.text = String(describing: reminder.remindafter)
+            cell.remainDayLabel.text = "\(reminder.todeadline) min remain"
             cell.remainDayLabel.textColor = UIColor.black
         }
 
@@ -89,15 +89,10 @@ class ReminderTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
-            reminders.remove(at: indexPath.row)
+            let reminder = reminders[indexPath.row]
 
-            
-//            let notification = DLNotification(identifier: "Notification\(indexPath.row)", alertTitle: "", alertBody: "", date: Date(), repeats: .None)
-//            let scheduler = DLNotificationScheduler()
-//            scheduler.cancelNotification(notification: notification)
-            
-            scheduleNotification(identifier: "Notification\(indexPath.row)", title: "", body: "", lastvisitdate: Date(), remindafter: -1)
-            
+            scheduleNotification(identifier: reminder.notificationId, title: "", body: "", lastvisitdate: Date(), remindafter: -1)
+            reminders.remove(at: indexPath.row)
             saveReminders()
             tableView.deleteRows(at: [indexPath], with: .fade)
         } else if editingStyle == .insert {
@@ -157,25 +152,6 @@ class ReminderTableViewController: UITableViewController {
 
     // MARK: Private Methods
     
-    private func loadSampleReminders() {
-        
-        let now = Date()
-        
-        guard let reminder1 = Reminder(city: "New York", state: "New York", lastvisitdate: now, remindafter: 1) else {
-            fatalError("Unable to instantiate reminder1")
-        }
-        
-        guard let reminder2 = Reminder(city: "Washington", state: "Washington", lastvisitdate: now, remindafter: 2) else {
-            fatalError("Unable to instantiate reminder1")
-        }
-        
-        guard let reminder3 = Reminder(city: "Boston", state: "Massachusetts", lastvisitdate: now, remindafter: 3) else {
-            fatalError("Unable to instantiate reminder1")
-        }
-        
-        reminders += [reminder1, reminder2, reminder3]
-    }
-    
     private func saveReminders() {
         let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(reminders, toFile: Reminder.ArchiveURL.path)
         
@@ -198,6 +174,25 @@ class ReminderTableViewController: UITableViewController {
         
         let scheduler = DLNotificationScheduler()
         print(scheduler.scheduleNotification(notification: notification) ?? "")
+        
+//        let scheduledNotifications: [UILocalNotification]? = UIApplication.shared.scheduledLocalNotifications
+//        guard scheduledNotifications != nil else {return}
+    }
+    
+    private func randomString(length: Int) -> String {
+        
+        let letters : NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let len = UInt32(letters.length)
+        
+        var randomString = ""
+        
+        for _ in 0 ..< length {
+            let rand = arc4random_uniform(len)
+            var nextChar = letters.character(at: Int(rand))
+            randomString += NSString(characters: &nextChar, length: 1) as String
+        }
+        
+        return randomString
     }
     
     // MARK: Actions
@@ -208,16 +203,20 @@ class ReminderTableViewController: UITableViewController {
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
                 //Update an existing reminder
                 reminders[selectedIndexPath.row] = reminder
-                scheduleNotification(identifier: "Notification\(selectedIndexPath.row)", title: "Visit \(reminder.city) in \(reminder.state)", body: "You should visit \(reminder.city) in \(reminder.state)", lastvisitdate: reminder.lastvisitdate, remindafter: reminder.remindafter)
+                reminders = reminders.sorted{$0.todeadline < $1.todeadline}
+                scheduleNotification(identifier: reminder.notificationId, title: "Visit \(reminder.city) in \(reminder.state)", body: "You should visit \(reminder.city) in \(reminder.state)", lastvisitdate: reminder.lastvisitdate, remindafter: reminder.remindafter)
 
-                tableView.reloadRows(at: [selectedIndexPath], with: .none)
+//                tableView.reloadRows(at: [selectedIndexPath], with: .none)
+                self.refresh()
             } else {
                 // Add a new reminder
-                let newIndexPath = IndexPath(row: reminders.count, section: 0)
-                
+                reminder.notificationId = self.randomString(length: 10)
                 reminders.append(reminder)
-                scheduleNotification(identifier: "Notification\(newIndexPath.row)", title: "Visit \(reminder.city) in \(reminder.state)", body: "You should visit \(reminder.city) in \(reminder.state)", lastvisitdate: reminder.lastvisitdate, remindafter: reminder.remindafter)
-                tableView.insertRows(at: [newIndexPath], with: .automatic)
+                reminders = reminders.sorted{$0.todeadline < $1.todeadline}
+
+                scheduleNotification(identifier: reminder.notificationId, title: "Visit \(reminder.city) in \(reminder.state)", body: "You should visit \(reminder.city) in \(reminder.state)", lastvisitdate: reminder.lastvisitdate, remindafter: reminder.remindafter)
+//                tableView.insertRows(at: [newIndexPath], with: .automatic)
+                self.refresh()
             }
             
             saveReminders()
