@@ -72,7 +72,7 @@ class ReminderTableViewController: UITableViewController {
             cell.remainDayLabel.text = "Overdue"
             cell.remainDayLabel.textColor = UIColor.red
         } else {
-            cell.remainDayLabel.text = "\(reminder.todeadline) min remain"
+            cell.remainDayLabel.text = "\(reminder.todeadline) day remain"
             cell.remainDayLabel.textColor = UIColor.black
         }
 
@@ -168,7 +168,7 @@ class ReminderTableViewController: UITableViewController {
     
     private func scheduleNotification (identifier: String, title: String, body: String, lastvisitdate: Date, remindafter: Int) {
         // The date you would like the notification to fire at
-        let triggerDate = lastvisitdate.addingTimeInterval(TimeInterval(remindafter * 60))
+        let triggerDate = lastvisitdate.addingTimeInterval(TimeInterval(remindafter * 60 * 60 * 24))
 
         let notification = DLNotification(identifier: identifier, alertTitle: title, alertBody: body, date: triggerDate, repeats: .None)
         

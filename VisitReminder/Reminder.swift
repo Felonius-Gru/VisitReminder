@@ -20,11 +20,11 @@ class Reminder: NSObject, NSCoding {
     var notificationId: String
     
     var isOverdue: Bool {
-        return (Date().compare(self.lastvisitdate.addingTimeInterval(TimeInterval(remindafter * 60))) == ComparisonResult.orderedDescending)
+        return (Date().compare(self.lastvisitdate.addingTimeInterval(TimeInterval(remindafter * 60 * 60 * 24))) == ComparisonResult.orderedDescending)
     }
     
     var todeadline: Int {
-        return Int(self.lastvisitdate.addingTimeInterval(TimeInterval(self.remindafter * 60)).timeIntervalSinceNow / 60)
+        return Int(self.lastvisitdate.addingTimeInterval(TimeInterval(self.remindafter * 60 * 60 * 24)).timeIntervalSinceNow / (60 * 60 * 24 ))
     }
     
     // MARK: Archiving Paths
